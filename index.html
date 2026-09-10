@@ -17,10 +17,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 body{font-family:Arial;margin:0;background:#f4f7fb;color:#172033}
-header{background:#305496;color:#fff;padding:4px 14px}
+header{background:#305496;color:#fff;padding:2px 14px}
 .wrap{max-width:1600px;margin:auto}
 .header-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.header-left h2{margin:0;font-size:.72rem;line-height:1.15;letter-spacing:.2px}
+.header-left h2{margin:0;font-size:0;line-height:0;letter-spacing:0;height:0;overflow:hidden;visibility:hidden}
 .header-left .sub{font-size:11px;opacity:.9;margin-top:0}
 .card{background:#fff;margin:14px 0;padding:14px;border-radius:10px;box-shadow:0 2px 10px #0001}
 button{padding:9px 14px;border:0;border-radius:7px;background:#1f4e78;color:#fff;font-weight:bold;cursor:pointer}
@@ -52,17 +52,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .faktur-card .fc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:11px;color:#475569}
 .faktur-card .fc-meta b{color:#0f172a;font-weight:700}
 .faktur-card .fc-badge{
-  display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;
-  background:#e2e8f0;color:#334155;letter-spacing:.04em;text-transform:uppercase;
+  display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:600;
+  background:#e2e8f0;color:#475569;letter-spacing:0;text-transform:uppercase;
   white-space:nowrap;
 }
 .faktur-card .fc-badge.cash{
-  background:#38bdf8;color:#0c4a6e;
-  box-shadow:0 0 0 1px rgba(56,189,248,.4),0 2px 6px rgba(56,189,248,.3);
+  background:#bae6fd;color:#0c4a6e;
+  box-shadow:none;
 }
 .faktur-card .fc-badge.tempo{
-  background:#ea580c;color:#fff;
-  box-shadow:0 0 0 1px rgba(234,88,12,.35),0 2px 6px rgba(234,88,12,.25);
+  background:#fed7aa;color:#9a3412;
+  box-shadow:none;
 }
 .faktur-card .fc-nums{display:flex;justify-content:space-between;gap:10px;padding-top:6px;border-top:1px dashed #d6e0ee}
 .faktur-card .fc-num-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
@@ -133,7 +133,7 @@ tfoot td{background:#ffe699;font-weight:bold}
 .filter-reset{background:#e2e8f0;color:#334155}
 .filter-info{font-size:11px;color:#64748b;margin-top:8px;line-height:1.35}
 .dd{position:relative}
-.dd-toggle{display:flex;align-items:center;gap:5px;background:#fff;color:#1f4e78;border:0;border-radius:6px;padding:4px 10px;font-weight:bold;font-size:12px;cursor:pointer;box-shadow:0 1px 4px #0002}
+.dd-toggle{display:flex;align-items:center;gap:5px;background:#fff;color:#1f4e78;border:0;border-radius:5px;padding:2px 8px;font-weight:bold;font-size:12px;cursor:pointer;box-shadow:0 1px 4px #0002;line-height:1.1}
 .dd-toggle:hover{background:#f0f4fa}
 .dd-toggle .chev{font-size:11px;transition:transform .2s}
 .dd.open .dd-toggle .chev{transform:rotate(180deg)}
@@ -191,7 +191,7 @@ tfoot td{background:#ffe699;font-weight:bold}
 .gmodal-ghost{background:#e2e8f0;color:#334155}
 .main-tab{
   background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.32);
-  padding:5px 14px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;
+  padding:3px 10px;font-size:12px;font-weight:700;border-radius:5px;cursor:pointer;line-height:1.1;
   letter-spacing:.4px;transition:background .15s ease;
 }
 .main-tab:hover{background:rgba(255,255,255,.30)}
@@ -488,14 +488,14 @@ body.dark .faktur-card .fc-faktur{color:#93c5fd}
 body.dark .faktur-card .fc-tgl{color:#94a3b8}
 body.dark .faktur-card .fc-meta{color:#94a3b8}
 body.dark .faktur-card .fc-meta b{color:#e2e8f0}
-body.dark .faktur-card .fc-badge{background:#475569;color:#e2e8f0}
+body.dark .faktur-card .fc-badge{background:#334155;color:#cbd5e1}
 body.dark .faktur-card .fc-badge.cash{
-  background:#38bdf8;color:#0c4a6e;
-  box-shadow:0 0 0 1px rgba(56,189,248,.55),0 0 12px rgba(56,189,248,.3);
+  background:#155e75;color:#cffafe;
+  box-shadow:none;
 }
 body.dark .faktur-card .fc-badge.tempo{
-  background:#f97316;color:#1c0a00;
-  box-shadow:0 0 0 1px rgba(249,115,22,.5),0 0 12px rgba(249,115,22,.25);
+  background:#7c2d12;color:#fed7aa;
+  box-shadow:none;
 }
 body.dark .faktur-card .fc-nums{border-top-color:#334155}
 body.dark .faktur-card .fc-num-label{color:#94a3b8}
@@ -527,12 +527,12 @@ body.dark .busy{background:rgba(15,23,42,.7);color:#93c5fd}
 body.dark .empty{color:#94a3b8}
 body.dark .theme-btn{
   background:#fff;border:1px solid rgba(255,255,255,.75);
-  color:#24518e;font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:700
+  color:#24518e;font-size:12px;padding:3px 8px;border-radius:5px;cursor:pointer;font-weight:700;line-height:1.1
 }
 body.dark .theme-btn:hover{background:rgba(255,255,255,.28)}
 .theme-btn{
   background:#fff;border:1px solid rgba(255,255,255,.75);
-  color:#24518e;font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer;font-weight:700
+  color:#24518e;font-size:12px;padding:3px 8px;border-radius:5px;cursor:pointer;font-weight:700;line-height:1.1
 }
 .theme-btn:hover{background:rgba(255,255,255,.28)}
 
@@ -541,7 +541,7 @@ body.dark .theme-btn:hover{background:rgba(255,255,255,.28)}
 .backup-btn{
   display:inline-flex;align-items:center;gap:5px;
   background:#fff;border:1px solid rgba(255,255,255,.75);
-  color:#24518e;font-size:12px;padding:5px 10px;border-radius:6px;
+  color:#24518e;font-size:12px;padding:3px 8px;border-radius:5px;
   cursor:pointer;font-weight:700;white-space:nowrap;
 }
 .backup-btn:hover{background:#f3f7fc}
@@ -582,10 +582,8 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
 <body>
 <header>
   <div class="wrap header-row">
-    <div class="header-left">
-      <h2>REKAP PENJUALAN &amp; DATA STOK</h2>
-    </div>
-    <button type="button" id="installBtn" style="display:none;padding:6px 10px;border:1px solid rgba(255,255,255,.5);border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">⬇ Instal Aplikasi</button>
+    <div class="header-left"></div>
+    <button type="button" id="installBtn" style="display:none;padding:3px 8px;border:1px solid rgba(255,255,255,.5);border-radius:5px;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;line-height:1.1">⬇ Instal Aplikasi</button>
     <div style="display:flex;align-items:center;gap:10px">
     <nav class="main-tabs" role="tablist" id="mainTabs">
       <button type="button" class="main-tab active" data-tab="penjualan">Penjualan</button>
@@ -1008,8 +1006,8 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
   let editHargaBeliMode = false;
 
   /* ------------- Cloud Sync (Supabase) ------------- */
-  const SUPABASE_URL = 'https://vrswoigjmhbkdmzbeodp.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_kjDZWdE-3ZPKTdj9kwDZCw_2yz766NL';
+  const SUPABASE_URL = 'https://twrfpovxjuubisskljjv.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_AeR-sG7aYIFrP5nIsloGfw_uJVYO3GN';
   const SYNC_ROW_ID  = 'main'; // 1 baris = 1 "database" bersama untuk semua device
   let sbClient = null, isSyncingFromCloud = false, pushTimer = null, realtimeReady = false;
 
@@ -4273,6 +4271,7 @@ self.onmessage = function(e){
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
