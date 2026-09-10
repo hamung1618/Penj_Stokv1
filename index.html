@@ -87,6 +87,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 .tabs button{background:#e2e8f0;color:#334155}
 .tabs button.active{background:#1f4e78;color:#fff}
+#page-penjualan #result.card{padding:10px 12px}
+#page-penjualan .tabs{gap:5px;margin-bottom:6px}
+#page-penjualan .tabs button{padding:6px 10px;font-size:11px;border-radius:6px;line-height:1.1}
+#page-penjualan .toolbar-row{gap:6px;margin-bottom:8px}
+#page-penjualan .toolbar-left{gap:6px}
+#page-penjualan .month-quick{gap:5px}
+#page-penjualan .month-quick label{font-size:10px}
+#page-penjualan .month-quick select{min-width:138px;padding:5px 10px;border-radius:6px;font-size:11px}
+#page-penjualan .month-quick .filter-btn{width:28px;height:28px;font-size:14px;border-radius:6px}
+#page-penjualan .col-picker-btn{padding:5px 10px;font-size:11px;border-radius:6px}
+#page-penjualan #toolbarSaveExcel{padding:5px 10px!important;border-radius:6px!important;font-size:11px!important}
 .tablebox{overflow:auto;max-height:68vh;position:relative}
 .vrow td{height:34px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis}
 .vspace td{padding:0!important;border:0!important}
@@ -106,6 +117,10 @@ tfoot td{background:#ffe699;font-weight:bold}
 .kpi b{display:block;font-size:16px;margin-top:4px;line-height:1.2;color:#0f172a;font-weight:700;letter-spacing:-.01em;position:relative;z-index:1}
 .kpi .kpi-meta{display:block;font-size:12px;margin-top:2px;color:#475569;font-weight:600;position:relative;z-index:1}
 .kpi .kpi-meta b{display:inline;font-size:12px;margin:0;color:#0f172a}
+.kpi.kpi-inline{padding-top:8px;padding-bottom:8px}
+.kpi-inline .kpi-inline-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px;position:relative;z-index:1}
+.kpi-inline .kpi-inline-row > b{display:inline;margin-top:0}
+.kpi-inline .kpi-inline-row .kpi-meta{display:inline;margin-top:0;white-space:nowrap}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
 .status{font-size:13px;margin-top:8px;color:#334155}
 .col-picker{position:relative;margin-left:0}
@@ -669,15 +684,19 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
   <div id="summary" style="display:none">
     <div class="kpis">
       <div class="kpi"><small>TOTAL FAKTUR</small><b id="f">0</b></div>
-      <div class="kpi">
+      <div class="kpi kpi-inline">
         <small>PRODUK FITRI</small>
-        <b id="fitriQty">Qty 0</b>
-        <span class="kpi-meta">Nominal <b id="fitriNom">Rp 0</b></span>
+        <div class="kpi-inline-row">
+          <b id="fitriQty">Qty 0</b>
+          <span class="kpi-meta">Nominal <b id="fitriNom">Rp 0</b></span>
+        </div>
       </div>
-      <div class="kpi">
+      <div class="kpi kpi-inline">
         <small>PRODUK RUPA RUPA</small>
-        <b id="rupaQty">Qty 0</b>
-        <span class="kpi-meta">Nominal <b id="rupaNom">Rp 0</b></span>
+        <div class="kpi-inline-row">
+          <b id="rupaQty">Qty 0</b>
+          <span class="kpi-meta">Nominal <b id="rupaNom">Rp 0</b></span>
+        </div>
       </div>
       <div class="kpi"><small>TOTAL PENJUALAN</small><b id="s">Rp 0</b></div>
     </div>
@@ -4271,6 +4290,7 @@ self.onmessage = function(e){
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
