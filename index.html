@@ -1075,10 +1075,19 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
     return result.data;
   }
   // Debounce agar tidak spam network saat banyak perubahan beruntun.
+  // pushInFlight menandai proses upload yang sedang berjalan (bukan cuma menunggu debounce),
+  // supaya beforeunload tahu kapan benar-benar masih ada yang belum terkirim.
+  let pushInFlight = false;
   function schedulePush(){
     clearTimeout(pushTimer);
     setCloudStatus('Menyinkronkan…');
-    pushTimer = setTimeout(pushToCloud, 1200);
+    pushTimer = setTimeout(async () => {
+      pushTimer = null; // timer sudah jalan, bukan lagi "pending" — reset supaya tidak nyangkut truthy selamanya
+      pushInFlight = true;
+      try { await pushToCloud(); }
+      catch(e){ console.error('pushToCloud gagal:', e); }
+      finally { pushInFlight = false; }
+    }, 1200);
   }
 
   // Ambil data terbaru dari cloud dan timpa data lokal (dipanggil saat pertama buka & saat ada update dari device lain).
@@ -1090,13 +1099,18 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
       if (error) throw error;
       if (data && data.data){
         isSyncingFromCloud = true;
-        const snap = data.data;
-        await db.tx.clear();
-        if (snap.tx && snap.tx.length) await db.tx.bulkPut(snap.tx);
-        await db.meta.clear();
-        if (snap.meta && snap.meta.length) await db.meta.bulkPut(snap.meta);
-        isSyncingFromCloud = false;
-        setCloudStatus('Sinkron dari cloud • ' + new Date().toLocaleTimeString('id-ID'));
+        try {
+          const snap = data.data;
+          await db.tx.clear();
+          if (snap.tx && snap.tx.length) await db.tx.bulkPut(snap.tx);
+          await db.meta.clear();
+          if (snap.meta && snap.meta.length) await db.meta.bulkPut(snap.meta);
+          setCloudStatus('Sinkron dari cloud • ' + new Date().toLocaleTimeString('id-ID'));
+        } finally {
+          // Selalu reset, walau db.tx.clear()/bulkPut() gagal di tengah jalan —
+          // supaya sinkron ke cloud tidak macet diam-diam selamanya.
+          isSyncingFromCloud = false;
+        }
       } else {
         // Belum ada data di cloud: kalau device ini punya data lokal, unggah dulu sebagai data awal.
         const localCount = await db.tx.count();
@@ -3922,12 +3936,22 @@ self.onmessage = function(e){
 
     const products = Array.from(new Set([...(existing.products||[]), ...(incoming.products||[])]));
 
-    // Saldo awal: pertahankan punya data lama (paling awal secara historis) untuk produk yang
-    // sudah ada; untuk produk baru yang belum pernah muncul, pakai saldo awal dari file baru.
+    // Saldo awal: pertahankan punya data lama untuk produk yang sudah ada HANYA kalau file
+    // baru ini murni lanjutan ke depan (tanggal paling awal di file baru > tanggal paling awal
+    // yang sudah tersimpan). Kalau file baru mencakup/menimpa tanggal paling awal yang sudah
+    // ada (mis. re-upload seluruh sheet karena Saldo Awal-nya dikoreksi), Saldo Awal dari file
+    // baru dipakai — bukan dibuang diam-diam. Produk yang benar-benar baru selalu pakai saldo
+    // awal dari file baru.
+    const existingMinTs = existing.rows.length ? Math.min(...existing.rows.map(r => r.ts)) : Infinity;
+    const incomingMinTs = (incoming.rows||[]).length ? Math.min(...incoming.rows.map(r => r.ts)) : Infinity;
+    const incomingIsCorrection = incomingMinTs <= existingMinTs;
+
     const saldoAwal = {};
     products.forEach(p => {
-      if (Object.prototype.hasOwnProperty.call(existing.saldoAwal||{}, p)) saldoAwal[p] = existing.saldoAwal[p];
-      else saldoAwal[p] = (incoming.saldoAwal||{})[p] ?? 0;
+      const hasOld = Object.prototype.hasOwnProperty.call(existing.saldoAwal||{}, p);
+      const hasNew = Object.prototype.hasOwnProperty.call(incoming.saldoAwal||{}, p);
+      if (hasOld && !(incomingIsCorrection && hasNew)) saldoAwal[p] = existing.saldoAwal[p];
+      else saldoAwal[p] = (incoming.saldoAwal||{})[p] ?? (hasOld ? existing.saldoAwal[p] : 0);
     });
 
     // Gabungkan baris berdasarkan ts (tanggal). Baris dari incoming menang jika bentrok.
@@ -4358,7 +4382,7 @@ self.onmessage = function(e){
   // Cegah pindah/tutup/refresh halaman saat masih ada upload ke cloud yang tertunda/berjalan,
   // supaya data yang baru saja diubah tidak sempat tertimpa data lama dari cloud saat reload.
   window.addEventListener('beforeunload', function(e){
-    if (pushTimer || isSyncingFromCloud) {
+    if (pushTimer || pushInFlight || isSyncingFromCloud) {
       e.preventDefault();
       e.returnValue = '';
       return '';
