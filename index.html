@@ -707,6 +707,7 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
       <button onclick="show('s7',this)">Sales per Produk</button>
       <button class="active" onclick="show('s6',this)">Faktur</button>
       <button onclick="show('s1',this)">Produk</button>
+      <button onclick="show('s8',this)">Profit/Faktur</button>
       <button onclick="show('s2',this)">Profit Per Pembayaran</button>
       <button onclick="show('s3',this)">Profit Penjualan per Produk</button>
       <button onclick="show('s4',this)">Rekap per Sales</button>
@@ -2074,7 +2075,7 @@ self.onmessage = function(e){
     s4rupa.sort((a,b) => SO.indexOf(a[0]) - SO.indexOf(b[0]));
     R = { s1, s2, s3, s4fitri, s4rupa, s5, qty, sales, hpp, profit, cs, ts, cp, tp, SO2, faktur, fitriQty, fitriSales, rupaQty, rupaSales };
     // reset halaman rekap saat data berubah
-    rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0 };
+    rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0, s8:0 };
   }
 
   // Tanda tangan kombinasi filter yang sedang aktif, dipakai sebagai key cache hasil build().
@@ -2091,7 +2092,7 @@ self.onmessage = function(e){
     if (cached){
       R = cached;
       dataVersion++;               // tetap anggap versi tampilan baru agar tab lain re-render
-      rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0 };
+      rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0, s8:0 };
       return;
     }
     build(data);
@@ -2230,6 +2231,14 @@ self.onmessage = function(e){
       const head=['NO','TANGGAL','NO. FAKTUR','SALES','PRODUK','QTY','SATUAN','HARGA JUAL','DISC','TOTAL','NOMINAL FAKTUR','PROFIT PER FAKTUR','PEMBAYARAN','CUSTOMER'];
       const rows=fRows.map((row,i)=>{const x=row.x;return [i+1,fmtTgl(x.Tanggal),row.faktur,x.Sales||row.sales||'',x.Produk||'',N(x.Jumlah),x.Satuan||'',N(x['Harga Jual']),N(x.Discount),N(x.Total),row.isFirst?row.nominal:'',row.isFirst?row.profit:'',x.Pembayaran||row.bayar||'',x.Customer||row.customer||''];});
       addReportSheet(wb,'Faktur','Rekap per Faktur',head,rows,['TOTAL','','','','',r.qty,'','','',r.sales,r.sales,r.profit,'','']);
+    } else if(tab==='s8'){
+      const groups=buildFakturGroups();
+      const head=['NO','TANGGAL','NO. FAKTUR','SALES','CUSTOMER','PEMBAYARAN','NOMINAL FAKTUR','PROFIT FAKTUR','MARGIN %'];
+      const rows=groups.map((g,i)=>[i+1,fmtTgl(g.tgl),g.faktur,g.sales||'',g.customer||'',g.bayar||'',g.nominal,g.profit,g.nominal?Math.round(g.profit/g.nominal*10000)/100:0]);
+      const totNominal=groups.reduce((a,g)=>a+g.nominal,0);
+      const totProfit=groups.reduce((a,g)=>a+g.profit,0);
+      const avgM=totNominal?(totProfit/totNominal*100):0;
+      addReportSheet(wb,'Profit Faktur','Profit per Faktur',head,rows,['TOTAL','','','','','',totNominal,totProfit,Math.round(avgM*100)/100]);
     } else if(tab==='s7'){
       const pivot=buildS7Pivot(s7DateFilter);
       const head=['TGL','PRODUK',...SO_S7.map(s=>s==='PARIMIN'?'PRTIMIN':s),'TOTAL QTY'];
@@ -2242,7 +2251,7 @@ self.onmessage = function(e){
       const total=['TOTAL','',...SO_S7.map(s=>pivot.grand[s]||0),pivot.grandTotal||0];
       addReportSheet(wb,'Sales per Produk','Qty Penjualan Per Sales Per Tgl',head,rows,total);
     }
-    const name='Laporan_'+({s0:'Transaksi',s1:'Produk',s2:'Profit_Pembayaran',s3:'Profit_Produk',s4:'Rekap_Sales',s5:'Margin_Produk',s6:'Faktur',s7:'Sales_per_Produk'}[tab]||'Penjualan')+'.xlsx';
+    const name='Laporan_'+({s0:'Transaksi',s1:'Produk',s2:'Profit_Pembayaran',s3:'Profit_Produk',s4:'Rekap_Sales',s5:'Margin_Produk',s6:'Faktur',s7:'Sales_per_Produk',s8:'Profit_Faktur'}[tab]||'Penjualan')+'.xlsx';
     XLSX.writeFile(wb,name);
   }
 
@@ -2418,7 +2427,7 @@ self.onmessage = function(e){
   }
 
   /* Paginasi tab rekap (siap data setahun / banyak produk) */
-  let rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0 };
+  let rekapPage = { s1:0, s2:0, s3:0, s5:0, s6:0, s8:0 };
   const REKAP_PAGE_SIZE = 60;
   function rekapPagerHtml(tab, total){
     const pages = Math.max(1, Math.ceil(total / REKAP_PAGE_SIZE));
@@ -2598,6 +2607,20 @@ self.onmessage = function(e){
              tbl(h, pack(R.s4rupa||[]), tot(R.s4rupa||[]));
     } else if (t === 's6'){
       return reportBar('s6','Rekap per Faktur') + renderRekapPerFaktur();
+    } else if (t === 's8'){
+      const groups = buildFakturGroups();
+      const h = ['NO','TANGGAL','NO. FAKTUR','SALES','CUSTOMER','PEMBAYARAN','NOMINAL FAKTUR','PROFIT FAKTUR','MARGIN %'];
+      const pageRows = sliceRekap('s8', groups);
+      const base = (rekapPage.s8 || 0) * REKAP_PAGE_SIZE;
+      const d = pageRows.map((g,i) => [
+        base+i+1, fmtTgl(g.tgl), g.faktur, g.sales || '', g.customer || '', g.bayar || '',
+        rp(g.nominal), rp(g.profit), (g.nominal ? (Math.round(g.profit/g.nominal*10000)/100) : 0).toLocaleString('id-ID') + ' %'
+      ]);
+      const totNominal = groups.reduce((a,g)=>a+g.nominal,0);
+      const totProfit = groups.reduce((a,g)=>a+g.profit,0);
+      const avgM = totNominal ? (totProfit/totNominal*100) : 0;
+      return reportBar('s8','Profit per Faktur') + rekapPagerHtml('s8', groups.length) +
+        tbl(h, d, ['TOTAL','','','','','', rp(totNominal), rp(totProfit), (Math.round(avgM*100)/100).toLocaleString('id-ID') + ' %']);
     } else {
       const h = ['NO','PRODUK','QTY','SATUAN','TOTAL PENJUALAN','TOTAL HPP','PROFIT','MARGIN %'];
       const pageRows = sliceRekap('s5', R.s5 || []);
