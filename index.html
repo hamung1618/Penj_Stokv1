@@ -1451,8 +1451,16 @@ self.onmessage = function(e){
       : '';
     setStatus('Berhasil diproses: ' + _parseFileName + ' (total tersimpan ' + totalRows.toLocaleString('id-ID') + ' baris)' + extra + (useIDB ? ' — IndexedDB' : ' — in-memori'));
     closeDd();
+    if (sbClient) {
+      setCloudStatus('Menyinkronkan…');
+      try {
+        await pushToCloud();
+      } catch(e){
+        console.warn('Auto-sync ke cloud gagal setelah import', e);
+        setCloudStatus('Gagal sync otomatis — klik "Upload Cloud" manual supaya data tidak hilang.');
+      }
+    }
     hideBusy();
-    schedulePush();
   }
 
   /* ------------- materialise internal-camel rows to UI form ------------- */
@@ -4285,6 +4293,16 @@ self.onmessage = function(e){
       await loadGudangFromDB();
     }
   })();
+
+  // Cegah pindah/tutup/refresh halaman saat masih ada upload ke cloud yang tertunda/berjalan,
+  // supaya data yang baru saja diubah tidak sempat tertimpa data lama dari cloud saat reload.
+  window.addEventListener('beforeunload', function(e){
+    if (pushTimer || isSyncingFromCloud) {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    }
+  });
 
   /* ------------- PWA: service worker + tombol instal ------------- */
   if ('serviceWorker' in navigator){
