@@ -829,7 +829,14 @@ body.dark .backup-action.warn{background:#422006;color:#fdba74;border-color:#924
           <div class="file-row"><input id="gudangFile" type="file" accept=".xlsx,.xls"></div>
           <div class="btn-row">
             <button type="button" onclick="processGudangFile()">Proses Excel Gudang</button>
-            <button type="button" class="danger-btn" onclick="clearGudangData()">Hapus SEMUA Data Gudang</button>
+          </div>
+          <div class="bulk-box">
+            <div class="menu-label">Hapus data per bulan</div>
+            <select id="gudangDeleteMonth" style="margin-bottom:8px"><option value="">Pilih bulan…</option></select>
+            <div class="btn-row">
+              <button type="button" class="danger-btn" onclick="deleteGudangMonth()">Hapus Bulan Terpilih</button>
+              <button type="button" class="danger-btn" onclick="clearGudangData()">Hapus SEMUA Data Gudang</button>
+            </div>
           </div>
           <div id="gudangStatus" class="hint" style="margin-top:8px">Belum ada data gudang.</div>
         </div>
@@ -3994,6 +4001,58 @@ self.onmessage = function(e){
     schedulePush();
   }
 
+  /* Hitung ulang STOK SFA (running balance) semua produk dari saldoAwal,
+     dipakai setelah baris dihapus/diubah supaya stok tetap berkesinambungan. */
+  function recomputeGudangStok(data){
+    if (!data || !data.rows) return data;
+    (data.products||[]).forEach(p => {
+      let running = N((data.saldoAwal||{})[p]);
+      data.rows.forEach(r => {
+        if (!r.values[p]) r.values[p] = {masuk:null, keluar:null, stok:null};
+        const v = r.values[p];
+        running = running + N(v.masuk) - N(v.keluar);
+        v.stok = running;
+      });
+    });
+    return data;
+  }
+
+  function populateGudangDeleteMonth(){
+    const sel = document.getElementById('gudangDeleteMonth');
+    if (!sel) return;
+    const cur = sel.value;
+    if (!gudangData || !gudangData.rows || !gudangData.rows.length){
+      sel.innerHTML = '<option value="">Belum ada data</option>';
+      return;
+    }
+    const monthKeys = [...new Set(gudangData.rows.map(r => monthKeyUTC(r.tanggal)).filter(Boolean))].sort().reverse();
+    sel.innerHTML = '<option value="">Pilih bulan…</option>' +
+      monthKeys.map(m => '<option value="' + m + '">' + monthLabel(m) + '</option>').join('');
+    if (monthKeys.includes(cur)) sel.value = cur;
+  }
+
+  async function deleteGudangMonth(){
+    const sel = document.getElementById('gudangDeleteMonth');
+    const month = sel && sel.value;
+    if (!month) return alert('Pilih bulan yang mau dihapus terlebih dahulu.');
+    if (!gudangData || !gudangData.rows || !gudangData.rows.length) return;
+    if (!confirm('Hapus data gudang bulan ' + monthLabel(month) + ' saja? Bulan lain tidak akan terpengaruh. Tindakan ini tidak bisa dibatalkan.')) return;
+    gudangData.rows = gudangData.rows.filter(r => monthKeyUTC(r.tanggal) !== month);
+    recomputeGudangStok(gudangData);
+    if (!gudangData.rows.length) gudangData = null;
+    if (useIDB){
+      try{
+        if (gudangData) await db.meta.put({key:'gudangData', value:gudangData});
+        else await db.meta.delete('gudangData');
+      } catch(e){ console.warn('save gudang', e); }
+    }
+    renderGudangPage(gudangData);
+    populateGudangDeleteMonth();
+    renderCekFitri();
+    setGudangStatus('Data gudang bulan ' + monthLabel(month) + ' sudah dihapus.');
+    schedulePush();
+  }
+
   async function saveGudangToDB(data){
     if (useIDB){ try{ await db.meta.put({key:'gudangData', value:data}); } catch(e){ console.warn('save gudang', e); } }
     schedulePush();
@@ -4037,6 +4096,7 @@ self.onmessage = function(e){
       kpiBox.innerHTML = '<div style="padding:10px 4px;color:#64748b;font-size:13px;align-self:center">Belum ada data gudang. Klik ⚙️ di kanan untuk upload file Excel.</div>';
       thead.innerHTML = '';
       tbody.innerHTML = '<tr><td style="text-align:center;padding:24px;color:#64748b">Belum ada data. Klik ⚙️ di atas untuk upload file Excel.</td></tr>';
+      populateGudangDeleteMonth();
       return;
     }
 
@@ -4119,6 +4179,7 @@ self.onmessage = function(e){
       }).join('') + '</tr>';
     }).join('');
     tbody.innerHTML = body;
+    populateGudangDeleteMonth();
   }
 
   /* ------------- Modal Input Stok Gudang (klik kartu produk) ------------- */
